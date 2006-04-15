@@ -14,33 +14,34 @@ use Test::More ;
 
 my $LZOP ;
 
-BEGIN {
+use CompTestUtils;
 
-    # Check external lzop is available
-    my $name = 'lzop';
-    for my $dir (reverse split ":", $ENV{PATH})
+
+sub ExternalLzopWorks
+{
+    my $lex = new LexFile my $outfile;
+    my $content = qq {
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus odio id
+ dolor. Camelus perlus.  Larrius in lumen numen.  Dolor en quiquum filia
+ est.  Quintus cenum parat.
+};
+
+    writeWithLzop($outfile, $content)
+        or return 0;
+    
+    my $got ;
+    readWithLzop($outfile, $got)
+        or return 0;
+
+    if ($content ne $got)
     {
-        $LZOP = "$dir/$name"
-            if -x "$dir/$name" ;
+        diag "Uncompressed content is wrong";
+        return 0 ;
     }
 
-    plan(skip_all => "Cannot find lzop")
-        if ! $LZOP ;
-
-    
-    # use Test::NoWarnings, if available
-    my $extra = 0 ;
-    $extra = 1
-        if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
-
-    plan tests => 17 + $extra ;
-
-    use_ok('IO::Compress::Lzop', qw(:all)) ;
-    use_ok('IO::Uncompress::UnLzop', qw(:all)) ;
-
+    return 1 ;
 }
 
-use CompTestUtils;
 
 sub readWithLzop
 {
@@ -50,14 +51,14 @@ sub readWithLzop
 
     my $comp = "$LZOP -dc" ;
 
-    #diag "$comp $file >$outfile" ;
+    if ( system("$comp $file >$outfile") == 0 )
+    {
+        $_[0] = readFile($outfile);
+        return 1 
+    }
 
-    system("$comp $file >$outfile") == 0
-        or die "'$comp' failed: $?";
-
-    $_[0] = readFile($outfile);
-
-    return 1 ;
+    diag "'$comp' failed: $?";
+    return 0 ;
 }
 
 
@@ -76,14 +77,43 @@ sub writeWithLzop
     writeFile($infile, $content);
 
     unlink $file ;
-    my $gzip = "$LZOP -c $options $infile >$file" ;
+    my $comp = "$LZOP -c $options $infile >$file" ;
 
-    system($gzip) == 0 
-        or die "'$gzip' failed: $?";
+    return 1 
+        if system($comp) == 0 ;
 
-    return 1 ;
+    diag "'$comp' failed: $?";
+    return 0 ;
 }
 
+
+BEGIN {
+
+    # Check external lzop is available
+    my $name = 'lzop';
+    for my $dir (reverse split ":", $ENV{PATH})
+    {
+        $LZOP = "$dir/$name"
+            if -x "$dir/$name" ;
+    }
+
+    plan(skip_all => "Cannot find lzop")
+        if ! $LZOP ;
+
+    plan(skip_all => "$name doesn't work as expected")
+        if ! ExternalLzopWorks();
+
+    # use Test::NoWarnings, if available
+    my $extra = 0 ;
+    $extra = 1
+        if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
+
+    plan tests => 17 + $extra ;
+
+    use_ok('IO::Compress::Lzop', qw(:all)) ;
+    use_ok('IO::Uncompress::UnLzop', qw(:all)) ;
+
+}
 
 {
     title "Test interop with $LZOP" ;

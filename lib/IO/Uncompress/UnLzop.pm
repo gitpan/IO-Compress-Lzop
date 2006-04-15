@@ -15,14 +15,14 @@ use IO::Compress::Lzop::Constants ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnLzopError);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 $UnLzopError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
 @EXPORT_OK = qw( $UnLzopError unlzop ) ;
-%EXPORT_TAGS = %IO::Uncompress::Base::EXPORT_TAGS ;
+#%EXPORT_TAGS = %IO::Uncompress::Base::EXPORT_TAGS ;
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
-Exporter::export_ok_tags('all');
+#Exporter::export_ok_tags('all');
 
 
 sub new

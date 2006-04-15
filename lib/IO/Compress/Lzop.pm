@@ -14,7 +14,7 @@ use IO::Compress::Lzop::Constants ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $LzopError);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 $LzopError = '';
 
 @ISA    = qw(Exporter IO::Compress::Base);

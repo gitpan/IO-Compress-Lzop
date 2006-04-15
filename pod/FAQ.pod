@@ -31,7 +31,7 @@ this to read compressed files
     {
         ...
 
-and this to write compress files if you have the C<compress> program
+and this to write compress files, if you have the C<compress> program
 available
 
     open F, "| compress -c $filename ";
@@ -97,6 +97,9 @@ A full interface for manipulating zip files is available with the
 C<Archive::Zip> module. You can find it on CPAN at 
 
     http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
+
+
+
 
 
 
